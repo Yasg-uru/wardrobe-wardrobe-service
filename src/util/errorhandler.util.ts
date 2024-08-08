@@ -1,5 +1,3 @@
-
-
 class Errorhandler extends Error {
   statuscode: number;
   constructor(statuscode: number, message: string) {
