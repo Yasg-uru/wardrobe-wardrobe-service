@@ -326,8 +326,8 @@ class ClothController {
     res: Response,
     next: NextFunction
   ) {
-    const userId=req.user?.id;
-    const cloths = await ClothModel.find({userId}).sort({ wearcount: 1 });
+    const userId = req.user?.id;
+    const cloths = await ClothModel.find({ userId }).sort({ wearcount: 1 });
     const leastWorn = cloths.slice(0, 2);
     const mostWorn = cloths.slice(-2).reverse();
     const TotalWearCount = cloths.reduce(
@@ -343,8 +343,83 @@ class ClothController {
       leastWorn,
       mostWorn,
       underUtilizedCloths,
-      AverageWearCount
+      AverageWearCount,
     });
+  }
+  public static async getReminder(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const currentmonth = new Date().getMonth() + 1;
+      const isRainy = [7, 8, 9].includes(currentmonth);
+      const isWinter = [10, 11, 12, 1, 2].includes(currentmonth);
+      const isSummer = [3, 4, 5, 6].includes(currentmonth);
+      console.log(isRainy, isWinter, isSummer);
+      const minimumStockThreshold = 3;
+
+      const rainyClothsCount = await ClothModel.countDocuments({
+        userId: user.id,
+        "weatherSuitability.isRainSuitable": isRainy,
+      });
+
+      if (rainyClothsCount < minimumStockThreshold) {
+        // sendReminder(
+        //   user.email,
+        //   "Low Rainy Weather Clothes Stock",
+        //   `You have only ${rainyClothsCount} rainy weather suitable clothes. Consider adding more.`
+        // );
+        return res.status(200).json({
+          title: "Low Rainy Weather Clothes Stock",
+          reminder: `You have only ${rainyClothsCount} rainy weather suitable clothes. Consider adding more.`,
+        });
+      }
+
+      const summerClothsCount = await ClothModel.countDocuments({
+        userId: user.id,
+        "seasonSuitability.isSummer": isSummer,
+      });
+
+      if (summerClothsCount < minimumStockThreshold) {
+        // sendReminder(
+        //   user.email,
+        //   "Low Summer Clothes Stock",
+        //   `You have only ${summerClothsCount} summer clothes. Consider adding more.`
+        // );
+        return res.status(200).json({
+          title: "Low Summer Clothes Stock",
+          reminder: `You have only ${summerClothsCount} summer clothes. Consider adding more.`,
+        });
+      }
+
+      const winterClothsCount = await ClothModel.countDocuments({
+        userId: user.id,
+        "weatherSuitability.isWinterSuitable": isWinter,
+      });
+
+      if (winterClothsCount < minimumStockThreshold) {
+        // sendReminder(
+        //   user.email,
+        //   "Low Winter Clothes Stock",
+        //   `You have only ${winterClothsCount} winter clothes. Consider adding more.`
+        // );
+        return res.status(200).json({
+          title: "Low Winter Clothes Stock",
+          reminder: `You have only ${winterClothsCount} winter clothes. Consider adding more.`,
+        });
+      }
+
+      return res.status(200).json({ message: "Reminder check completed" });
+    } catch (error) {
+      console.error("Error in getReminder:", error);
+      next(new Errorhandler(500, "Internal server error"));
+    }
   }
 }
 export default ClothController;
