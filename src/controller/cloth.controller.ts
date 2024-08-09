@@ -94,51 +94,7 @@ class ClothController {
     const { ClothId } = req.params;
     //implemented soon after creating all the controllers
   }
-  // public static async Recommandationwheather(
-  //   req: RequestWithUser,
-  //   res: Response,
-  //   next: NextFunction
-  // ) {
-  //   const userId = req.user?.id;
-  //   const lat: number = 22.07;
-  //   const lon: number = 78.93;
-  //   const weather = await WeatherService.fetchdata(lat, lon, next);
-  //   const { temp_c, condition, wind_kph } = weather.current;
-  //   console.log("this is a weather:",weather)
-  //   const isRainy = condition.text.toLowerCase().includes("rain");
-  //   const isWindy = wind_kph > 15;
-  //   const isSunny = condition.text.toLowerCase().includes("sunny");
-  //   const isCloudy = condition.text.toLowerCase().includes("cloudy");
-  //   const isSnowy = condition.text.toLowerCase().includes("snow");
 
-  //   // Adjust season suitability
-  //   const isSummer = temp_c > 30;
-  //   const isWinter = temp_c < 18;
-  //   const isSpring = temp_c >= 18 && temp_c <= 25;
-  //   const isAutumn = temp_c > 25 && temp_c <= 30;
-
-  //   // Fetch suitable clothes based on weather and season
-  //   let sustainableCloths = await ClothModel.find({
-  //     userId,
-  //     "weatherSuitability.isRainSuitable": isRainy,
-  //     "weatherSuitability.isWindSuitable": isWindy,
-  //     "weatherSuitability.isSunnySuitable": isSunny,
-  //     "weatherSuitability.isCloudySuitable": isCloudy,
-  //     "weatherSuitability.isSnowySuitable": isSnowy,
-  //     // $or: [
-  //     //   { "seasonSuitability.isSummer": isSummer },
-  //     //   { "seasonSuitability.isWinter": isWinter },
-  //     //   { "seasonSuitability.isSpring": isSpring },
-  //     //   { "seasonSuitability.isAutumn": isAutumn },
-  //     // ],
-  //   });
-
-  //   res.status(200).json({
-  //     success: true,
-  //     message: "successfully fetched your recommanded cloths",
-  //     sustainableCloths,
-  //   });
-  // }
   public static async Recommandationwheather(
     req: RequestWithUser,
     res: Response,
@@ -192,6 +148,29 @@ class ClothController {
     } catch (error) {
       next(error);
     }
+  }
+  public static async SearchCloths(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { searchQuery } = req.query;
+    if (typeof searchQuery !== "string" || !searchQuery.trim()) {
+      return res.status(400).json({ message: "Invalid search query" });
+    }
+    const userId = req.user?.id;
+
+    const result = await ClothModel.find({
+      userId,
+      $text: { $search: searchQuery.trim() },
+    });
+    if (result.length === 0) {
+      return next(new Errorhandler(404, "No result found"));
+    }
+    res.status(200).json({
+      message: "searched your results successfully",
+      result,
+    });
   }
 }
 export default ClothController;

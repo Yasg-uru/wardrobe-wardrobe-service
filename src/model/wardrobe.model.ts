@@ -144,6 +144,13 @@ const ClotheSchema: Schema = new Schema<IClothinItem>(
     timestamps: true,
   }
 );
+ClotheSchema.index({
+  category: "text",
+  color: "text",
+  brand: "text",
+  material: "text",
+  tags: "text",
+});
 ClotheSchema.index({ category: 1, color: 1 });
 ClotheSchema.index({ brand: 1 });
 ClotheSchema.index({ material: 1 });
