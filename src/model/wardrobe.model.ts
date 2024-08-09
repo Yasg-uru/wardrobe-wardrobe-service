@@ -154,7 +154,7 @@ ClotheSchema.index({
 ClotheSchema.index({ category: 1, color: 1 });
 ClotheSchema.index({ brand: 1 });
 ClotheSchema.index({ material: 1 });
-ClotheSchema.index({ wearCount: -1 });
+ClotheSchema.index({ wearcount: -1 });
 ClotheSchema.index({ isFavorite: 1 });
 const ClothModel = mongoose.model<IClothinItem>("ClothItem", ClotheSchema);
 export default ClothModel;

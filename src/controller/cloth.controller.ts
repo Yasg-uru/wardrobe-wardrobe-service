@@ -299,27 +299,52 @@ class ClothController {
     next: NextFunction
   ) {
     try {
-    const { clothId } = req.params;
-    const cloth = await ClothModel.findById(clothId);
-    if (!cloth) {
-      return next(new Errorhandler(404, "Cloth not found"));
-    }
-    const { condition } = req.body;
-    cloth.wearcount += 1;
-    cloth.lastWorn = new Date();
-    if (cloth.condition === "New") {
-      cloth.condition = "Worn";
-    } else if (condition) {
-      cloth.condition = condition;
-    }
-    await cloth.save();
-    res.status(200).json({
-      message: "Successfully updated cloth status",
-      cloth,
-    });
+      const { clothId } = req.params;
+      const cloth = await ClothModel.findById(clothId);
+      if (!cloth) {
+        return next(new Errorhandler(404, "Cloth not found"));
+      }
+      const { condition } = req.body;
+      cloth.wearcount += 1;
+      cloth.lastWorn = new Date();
+      if (cloth.condition === "New") {
+        cloth.condition = "Worn";
+      } else if (condition) {
+        cloth.condition = condition;
+      }
+      await cloth.save();
+      res.status(200).json({
+        message: "Successfully updated cloth status",
+        cloth,
+      });
     } catch (error) {
       next(new Errorhandler(500, "Internal server error"));
     }
+  }
+  public static async GetWearAnalysis(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    const userId=req.user?.id;
+    const cloths = await ClothModel.find({userId}).sort({ wearcount: 1 });
+    const leastWorn = cloths.slice(0, 2);
+    const mostWorn = cloths.slice(-2).reverse();
+    const TotalWearCount = cloths.reduce(
+      (acc, cloth) => acc + cloth.wearcount,
+      0
+    );
+    const AverageWearCount = TotalWearCount / cloths.length;
+    const underUtilizedCloths = cloths.filter(
+      (cloth) => cloth.wearcount < AverageWearCount
+    );
+    res.status(200).json({
+      message: "successfully fetched wear analysis",
+      leastWorn,
+      mostWorn,
+      underUtilizedCloths,
+      AverageWearCount
+    });
   }
 }
 export default ClothController;
