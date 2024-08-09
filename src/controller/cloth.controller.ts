@@ -154,23 +154,144 @@ class ClothController {
     res: Response,
     next: NextFunction
   ) {
-    const { searchQuery } = req.query;
-    if (typeof searchQuery !== "string" || !searchQuery.trim()) {
-      return res.status(400).json({ message: "Invalid search query" });
-    }
-    const userId = req.user?.id;
+    try {
+      const { searchQuery } = req.query;
+      if (typeof searchQuery !== "string" || !searchQuery.trim()) {
+        return res.status(400).json({ message: "Invalid search query" });
+      }
+      const userId = req.user?.id;
 
-    const result = await ClothModel.find({
-      userId,
-      $text: { $search: searchQuery.trim() },
-    });
-    if (result.length === 0) {
-      return next(new Errorhandler(404, "No result found"));
+      const result = await ClothModel.find({
+        userId,
+        $text: { $search: searchQuery.trim() },
+      });
+      if (result.length === 0) {
+        return next(new Errorhandler(404, "No result found"));
+      }
+      res.status(200).json({
+        message: "searched your results successfully",
+        result,
+      });
+    } catch (error) {
+      next(new Errorhandler(500, "Internal server error"));
     }
-    res.status(200).json({
-      message: "searched your results successfully",
-      result,
-    });
+  }
+  public static async filter(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user?.id;
+      const {
+        category,
+        color,
+        size,
+        brand,
+        material,
+        tags,
+        condition,
+        isRainSuitable,
+        isWindSuitable,
+        isSunnySuitable,
+        isCloudySuitable,
+        isSnowySuitable,
+        isSummer,
+        isWinter,
+        isSpring,
+        isAutumn,
+        isFavorite,
+        isArchived,
+        minCost,
+        maxCost,
+        minWearCount,
+        maxWearCount,
+      } = req.query;
+      const query: any = {};
+      query.userId = userId;
+      if (category) {
+        query.category = category;
+      }
+      if (color) {
+        query.color = color;
+      }
+      if (size) {
+        query.size = size;
+      }
+      if (brand) {
+        query.brand = brand;
+      }
+      if (material) {
+        query.material = material;
+      }
+      if (condition) {
+        query.condition = condition;
+      }
+      if (typeof isRainSuitable === "boolean") {
+        query["weatherSuitability.isRainSuitable"] = isRainSuitable;
+      }
+      if (typeof isWindSuitable === "boolean") {
+        query["weatherSuitability.isWindSuitable"] = isWindSuitable;
+      }
+      if (typeof isCloudySuitable === "boolean") {
+        query["weatherSuitability.isCloudySuitable"] = isCloudySuitable;
+      }
+      if (typeof isSunnySuitable === "boolean") {
+        query["weatherSuitability.isSunnySuitable"] = isSunnySuitable;
+      }
+      if (typeof isSnowySuitable === "boolean") {
+        query["weatherSuitability.isSnowySuitable"] = isSnowySuitable;
+      }
+      if (typeof isSummer === "boolean") {
+        query["seasonSuitability.isSummer"] = isSummer;
+      }
+      if (typeof isWinter === "boolean") {
+        query["seasonSuitability.isWinter"] = isWinter;
+      }
+      if (typeof isSpring === "boolean") {
+        query["seasonSuitability.isSpring"] = isSpring;
+      }
+      if (typeof isAutumn === "boolean") {
+        query["seasonSuitability.isAutumn"] = isAutumn;
+      }
+      if (typeof isArchived === "boolean") {
+        query.isArchived = isArchived;
+      }
+      if (typeof isFavorite === "boolean") {
+        query.isFavorite = isFavorite;
+      }
+      if (typeof isAutumn === "boolean") {
+        query["seasonSuitability.isAutumn"] = isAutumn;
+      }
+      if (minCost || maxCost) {
+        query.cost = {};
+      }
+      if (minCost) {
+        query.cost.$gte = minCost;
+      }
+      if (maxCost) {
+        query.cost.$lte = maxCost;
+      }
+      if (minWearCount || maxWearCount) {
+        query.wearcount = {};
+      }
+      if (minWearCount) {
+        query.wearcount.$gte = minWearCount;
+      }
+      if (maxWearCount) {
+        query.wearcount.$lte = maxWearCount;
+      }
+      const results = await ClothModel.find(query);
+      if (results.length === 0) {
+        return next(new Errorhandler(404, "Sorry no result found "));
+      }
+      res.status(200).json({
+        message: "successfully fetched filtered data ",
+        results,
+      });
+    } catch (error) {
+      next(new Errorhandler(500, "Internal server error"));
+    }
   }
 }
 export default ClothController;

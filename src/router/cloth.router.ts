@@ -1,10 +1,16 @@
-import {Router} from "express";
+import { Router } from "express";
 import upload from "../middleware/multer.middleware";
 import ClothController from "../controller/cloth.controller";
 import { isAuthenticated } from "../middleware/auth.middleware";
-const clothRouter=Router();
-clothRouter.post('/create',upload.single("imageurl"),isAuthenticated,ClothController.create)
-clothRouter.get("/",isAuthenticated,ClothController.Recommandationwheather);
-clothRouter.get("/search",isAuthenticated,ClothController.SearchCloths);
+const clothRouter = Router();
+clothRouter.post(
+  "/create",
+  upload.single("imageurl"),
+  isAuthenticated,
+  ClothController.create
+);
+clothRouter.get("/", isAuthenticated, ClothController.Recommandationwheather);
+clothRouter.get("/search", isAuthenticated, ClothController.SearchCloths);
+clothRouter.get("/filter", isAuthenticated, ClothController.filter);
 
 export default clothRouter;
