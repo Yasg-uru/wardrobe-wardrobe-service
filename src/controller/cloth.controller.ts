@@ -293,5 +293,33 @@ class ClothController {
       next(new Errorhandler(500, "Internal server error"));
     }
   }
+  public static async Wear(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+    const { clothId } = req.params;
+    const cloth = await ClothModel.findById(clothId);
+    if (!cloth) {
+      return next(new Errorhandler(404, "Cloth not found"));
+    }
+    const { condition } = req.body;
+    cloth.wearcount += 1;
+    cloth.lastWorn = new Date();
+    if (cloth.condition === "New") {
+      cloth.condition = "Worn";
+    } else if (condition) {
+      cloth.condition = condition;
+    }
+    await cloth.save();
+    res.status(200).json({
+      message: "Successfully updated cloth status",
+      cloth,
+    });
+    } catch (error) {
+      next(new Errorhandler(500, "Internal server error"));
+    }
+  }
 }
 export default ClothController;

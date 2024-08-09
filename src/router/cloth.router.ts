@@ -12,5 +12,6 @@ clothRouter.post(
 clothRouter.get("/", isAuthenticated, ClothController.Recommandationwheather);
 clothRouter.get("/search", isAuthenticated, ClothController.SearchCloths);
 clothRouter.get("/filter", isAuthenticated, ClothController.filter);
+clothRouter.post("/wear/:clothId",isAuthenticated,ClothController.Wear);
 
 export default clothRouter;
