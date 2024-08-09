@@ -15,6 +15,20 @@ export interface IClothinItem extends Document {
   cost: number;
   isFavorite: boolean;
   isArchived: boolean;
+  isFormal: boolean;
+  weatherSuitability: {
+    isRainSuitable: boolean;
+    isWindSuitable: boolean;
+    isSunnySuitable: boolean;
+    isCloudySuitable: boolean;
+    isSnowySuitable: boolean;
+  };
+  seasonSuitability: {
+    isSummer: boolean;
+    isWinter: boolean;
+    isSpring: boolean;
+    isAutumn: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,7 +41,7 @@ const ClotheSchema: Schema = new Schema<IClothinItem>(
     },
     imageurl: {
       type: String,
-      required: [true, "image is required"],
+      // required: [true, "image is required"],
     },
     category: {
       type: String,
@@ -74,6 +88,46 @@ const ClotheSchema: Schema = new Schema<IClothinItem>(
       type: Number,
       required: [true, "cost of the cloth is required"],
       min: 0,
+    },
+    seasonSuitability: {
+      isWinter: {
+        type: Boolean,
+        default: false,
+      },
+      isSummer: {
+        type: Boolean,
+        default: false,
+      },
+      isSpring: {
+        type: Boolean,
+        default: false,
+      },
+      isAutumn: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    weatherSuitability: {
+      isWindSuitable: {
+        type: Boolean,
+        default: false,
+      },
+      isRainSuitable: {
+        type: Boolean,
+        default: false,
+      },
+      isSnowySuitable: {
+        type: Boolean,
+        default: false,
+      },
+      isCloudySuitable: {
+        type: Boolean,
+        default: false,
+      },
+      isSunnySuitable: {
+        type: Boolean,
+        default: false,
+      },
     },
     isFavorite: {
       type: Boolean,
