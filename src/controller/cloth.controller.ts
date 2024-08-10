@@ -421,5 +421,12 @@ class ClothController {
       next(new Errorhandler(500, "Internal server error"));
     }
   }
+  // public static pu(
+  //   req: RequestWithUser,
+  //   res: Response,
+  //   next: NextFunction
+  // ) {
+
+  // }
 }
 export default ClothController;
