@@ -5,12 +5,13 @@ class WeatherService {
   private static readonly BASE_URL =
     "https://api.weatherapi.com/v1/forecast.json";
   private static readonly API_KEY = "995967ca3cd04f8f92a32058240204";
-  public static async fetchdata(lat: number, lon: number, next: NextFunction) {
+  public static async fetchdata(lat: string, lon: string, next: NextFunction) {
     try {
+      
       const response = await axios.get(this.BASE_URL, {
         params: {
           key: this.API_KEY,
-          q: `${lat},${lon}`,
+          q: `${parseInt(lat)},${parseInt(lon)}`,
         },
       });
       return response.data;

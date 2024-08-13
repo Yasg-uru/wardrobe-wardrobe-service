@@ -12,9 +12,9 @@ class ClothController {
   ) {
     // try {
     const userId = req.user?.id;
-    //   if (!req.file) {
-    //     return next(new Errorhandler(404, "please select file first"));
-    //   }
+    if (!req.file) {
+      return next(new Errorhandler(404, "please select file first"));
+    }
 
     const {
       category,
@@ -33,8 +33,8 @@ class ClothController {
       isFavorite,
       isArchived,
     } = req.body;
-    //   const cloudinary = await UploadOnCloudinary(req.file.path);
-    //   const imageurl = cloudinary?.secure_url;
+    const cloudinary = await UploadOnCloudinary(req.file.path);
+    const imageurl = cloudinary?.secure_url;
 
     const newClothItem = new ClothModel({
       category,
@@ -52,7 +52,7 @@ class ClothController {
       weatherSuitability,
       isFavorite,
       isArchived,
-      imageurl: null,
+      imageurl,
       userId,
     });
     await newClothItem.save();
@@ -95,17 +95,79 @@ class ClothController {
     //implemented soon after creating all the controllers
   }
 
+  // public static async Recommandationwheather(
+  //   req: RequestWithUser,
+  //   res: Response,
+  //   next: NextFunction
+  // ) {
+  //   const userId = req.user?.id;
+  //   const lat: number = 22.07;
+  //   const lon: number = 78.93;
+
+  //   try {
+  //     const weather = await WeatherService.fetchdata(lat, lon, next);
+  //     const { temp_c, condition, wind_kph } = weather.current;
+  //     console.log("this is a weather:", weather);
+
+  //     const isRainy = condition.text.toLowerCase().includes("rain");
+  //     const isWindy = wind_kph > 15;
+  //     const isSunny = condition.text.toLowerCase().includes("sunny");
+  //     const isCloudy = condition.text.toLowerCase().includes("cloudy");
+  //     const isSnowy = condition.text.toLowerCase().includes("snow");
+
+  //     // Adjust season suitability
+  //     const isSummer = temp_c > 30;
+  //     const isWinter = temp_c < 18;
+  //     const isSpring = temp_c >= 18 && temp_c <= 25;
+  //     const isAutumn = temp_c > 25 && temp_c <= 30;
+
+  //     // Fetch suitable clothes based on weather and season
+  //     let sustainableCloths = await ClothModel.find({
+  //       userId,
+
+  //       "weatherSuitability.isRainSuitable": isRainy,
+  //       "weatherSuitability.isWindSuitable": isWindy,
+  //       "weatherSuitability.isSunnySuitable": isSunny,
+  //       "weatherSuitability.isCloudySuitable": isCloudy,
+  //       "weatherSuitability.isSnowySuitable": isSnowy,
+  //     });
+  //     if (sustainableCloths.length === 0) {
+  //       sustainableCloths = await ClothModel.find({
+  //         userId,
+  //         "seasonSuitability.isSummer": isSummer,
+  //         "seasonSuitability.isWinter": isWinter,
+  //         "seasonSuitability.isSpring": isSpring,
+  //         "seasonSuitability.isAutumn": isAutumn,
+  //       });
+  //     }
+  //     res.status(200).json({
+  //       success: true,
+  //       message: "Successfully fetched your recommended clothes",
+  //       sustainableCloths,
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
   public static async Recommandationwheather(
     req: RequestWithUser,
     res: Response,
     next: NextFunction
   ) {
+    console.log("this is a recommandation api request:", req.query);
+
     const userId = req.user?.id;
-    const lat: number = 22.07;
-    const lon: number = 78.93;
+    const { lat, lon } = req.query;
+    if (!lat || !lon) {
+      return next(new Errorhandler(400, "please provide lat lon"));
+    }
 
     try {
-      const weather = await WeatherService.fetchdata(lat, lon, next);
+      const weather = await WeatherService.fetchdata(
+        lat.toString(),
+        lon.toString(),
+        next
+      );
       const { temp_c, condition, wind_kph } = weather.current;
       console.log("this is a weather:", weather);
 
@@ -121,34 +183,93 @@ class ClothController {
       const isSpring = temp_c >= 18 && temp_c <= 25;
       const isAutumn = temp_c > 25 && temp_c <= 30;
 
-      // Fetch suitable clothes based on weather and season
-      let sustainableCloths = await ClothModel.find({
-        userId,
+      let sustainableCloths: any = [];
 
-        "weatherSuitability.isRainSuitable": isRainy,
-        "weatherSuitability.isWindSuitable": isWindy,
-        "weatherSuitability.isSunnySuitable": isSunny,
-        "weatherSuitability.isCloudySuitable": isCloudy,
-        "weatherSuitability.isSnowySuitable": isSnowy,
-      });
-      if (sustainableCloths.length === 0) {
+      // Check for rain suitability
+      if (isRainy) {
         sustainableCloths = await ClothModel.find({
           userId,
-          "seasonSuitability.isSummer": isSummer,
-          "seasonSuitability.isWinter": isWinter,
-          "seasonSuitability.isSpring": isSpring,
-          "seasonSuitability.isAutumn": isAutumn,
+          "weatherSuitability.isRainSuitable": true,
         });
       }
+
+      // Check for wind suitability
+      if (sustainableCloths.length === 0 && isWindy) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "weatherSuitability.isWindSuitable": true,
+        });
+      }
+
+      // Check for sunny suitability
+      if (sustainableCloths.length === 0 && isSunny) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "weatherSuitability.isSunnySuitable": true,
+        });
+      }
+
+      // Check for cloudy suitability
+      if (sustainableCloths.length === 0 && isCloudy) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "weatherSuitability.isCloudySuitable": true,
+        });
+      }
+
+      // Check for snow suitability
+      if (sustainableCloths.length === 0 && isSnowy) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "weatherSuitability.isSnowySuitable": true,
+        });
+      }
+
+      // Check for summer suitability
+      if (sustainableCloths.length === 0 && isSummer) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "seasonSuitability.isSummer": true,
+        });
+      }
+
+      // Check for winter suitability
+      if (sustainableCloths.length === 0 && isWinter) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "seasonSuitability.isWinter": true,
+        });
+      }
+
+      // Check for spring suitability
+      if (sustainableCloths.length === 0 && isSpring) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "seasonSuitability.isSpring": true,
+        });
+      }
+
+      // Check for autumn suitability
+      if (sustainableCloths.length === 0 && isAutumn) {
+        sustainableCloths = await ClothModel.find({
+          userId,
+          "seasonSuitability.isAutumn": true,
+        });
+      }
+
       res.status(200).json({
         success: true,
-        message: "Successfully fetched your recommended clothes",
+        message:
+          sustainableCloths.length > 0
+            ? "Successfully fetched your recommended clothes"
+            : "No suitable clothes found for the current weather or season",
         sustainableCloths,
       });
     } catch (error) {
       next(error);
     }
   }
+
   public static async SearchCloths(
     req: RequestWithUser,
     res: Response,
@@ -207,6 +328,7 @@ class ClothController {
         minWearCount,
         maxWearCount,
       } = req.query;
+      console.log("this is a request query:", req.query);
       const query: any = {};
       query.userId = userId;
       if (category) {
@@ -227,60 +349,62 @@ class ClothController {
       if (condition) {
         query.condition = condition;
       }
-      if (typeof isRainSuitable === "boolean") {
-        query["weatherSuitability.isRainSuitable"] = isRainSuitable;
+      if (isRainSuitable === "true" || isRainSuitable === "false") {
+        query["weatherSuitability.isRainSuitable"] = isRainSuitable === "true";
       }
-      if (typeof isWindSuitable === "boolean") {
-        query["weatherSuitability.isWindSuitable"] = isWindSuitable;
+      if (isWindSuitable === "true" || isWindSuitable === "false") {
+        query["weatherSuitability.isWindSuitable"] = isWindSuitable === "true";
       }
-      if (typeof isCloudySuitable === "boolean") {
-        query["weatherSuitability.isCloudySuitable"] = isCloudySuitable;
+      if (isCloudySuitable === "true" || isCloudySuitable === "false") {
+        query["weatherSuitability.isCloudySuitable"] =
+          isCloudySuitable === "true";
       }
-      if (typeof isSunnySuitable === "boolean") {
-        query["weatherSuitability.isSunnySuitable"] = isSunnySuitable;
+      if (isSunnySuitable === "true" || isSunnySuitable === "false") {
+        query["weatherSuitability.isSunnySuitable"] =
+          isSunnySuitable === "true";
       }
-      if (typeof isSnowySuitable === "boolean") {
-        query["weatherSuitability.isSnowySuitable"] = isSnowySuitable;
+      if (isSnowySuitable === "true" || isSnowySuitable === "false") {
+        query["weatherSuitability.isSnowySuitable"] =
+          isSnowySuitable === "true";
       }
-      if (typeof isSummer === "boolean") {
-        query["seasonSuitability.isSummer"] = isSummer;
+      if (isSummer === "true" || isSummer === "false") {
+        query["seasonSuitability.isSummer"] = isSummer === "true";
       }
-      if (typeof isWinter === "boolean") {
-        query["seasonSuitability.isWinter"] = isWinter;
+      if (isWinter === "true" || isWinter === "false") {
+        query["seasonSuitability.isWinter"] = isWinter === "true";
       }
-      if (typeof isSpring === "boolean") {
-        query["seasonSuitability.isSpring"] = isSpring;
+      if (isSpring === "true" || isSpring === "false") {
+        query["seasonSuitability.isSpring"] = isSpring === "true";
       }
-      if (typeof isAutumn === "boolean") {
-        query["seasonSuitability.isAutumn"] = isAutumn;
+      if (isAutumn === "true" || isAutumn === "false") {
+        query["seasonSuitability.isAutumn"] = isAutumn === "true";
       }
-      if (typeof isArchived === "boolean") {
-        query.isArchived = isArchived;
+      if (isArchived === "true" || isArchived === "false") {
+        query.isArchived = isArchived === "true";
       }
-      if (typeof isFavorite === "boolean") {
-        query.isFavorite = isFavorite;
+      if (isFavorite === "true" || isFavorite === "false") {
+        query.isFavorite = isFavorite === "true";
       }
-      if (typeof isAutumn === "boolean") {
-        query["seasonSuitability.isAutumn"] = isAutumn;
-      }
+
       if (minCost || maxCost) {
         query.cost = {};
       }
       if (minCost) {
-        query.cost.$gte = minCost;
+        query.cost.$gte = Number(minCost);
       }
       if (maxCost) {
-        query.cost.$lte = maxCost;
+        query.cost.$lte = Number(maxCost);
       }
       if (minWearCount || maxWearCount) {
         query.wearcount = {};
       }
       if (minWearCount) {
-        query.wearcount.$gte = minWearCount;
+        query.wearcount.$gte = Number(minWearCount);
       }
       if (maxWearCount) {
-        query.wearcount.$lte = maxWearCount;
+        query.wearcount.$lte = Number(maxWearCount);
       }
+      console.log("this is a query:", query);
       const results = await ClothModel.find(query);
       if (results.length === 0) {
         return next(new Errorhandler(404, "Sorry no result found "));
@@ -421,12 +545,26 @@ class ClothController {
       next(new Errorhandler(500, "Internal server error"));
     }
   }
-  // public static pu(
-  //   req: RequestWithUser,
-  //   res: Response,
-  //   next: NextFunction
-  // ) {
+  public static async GetCollections(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user?.id;
 
-  // }
+      const Collections = await ClothModel.find({ userId });
+      if (Collections.length === 0) {
+        return next(new Errorhandler(404, "Collections not found "));
+      }
+      res.status(200).json({
+        success: true,
+        message: "Successfully fetched your collections ",
+        Collections,
+      });
+    } catch (error) {
+      next(new Errorhandler(500, "Internal server error"));
+    }
+  }
 }
 export default ClothController;

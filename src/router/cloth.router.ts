@@ -18,6 +18,11 @@ clothRouter.get(
   isAuthenticated,
   ClothController.GetWearAnalysis
 );
+clothRouter.get(
+  "/collections",
+  isAuthenticated,
+  ClothController.GetCollections
+);
 clothRouter.get("/reminder", isAuthenticated, ClothController.getReminder);
 
 export default clothRouter;
