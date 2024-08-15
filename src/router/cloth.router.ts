@@ -9,6 +9,8 @@ clothRouter.post(
   isAuthenticated,
   ClothController.create
 );
+clothRouter.delete("/:clothId",isAuthenticated,ClothController.delete);
+
 clothRouter.get("/", isAuthenticated, ClothController.Recommandationwheather);
 clothRouter.get("/search", isAuthenticated, ClothController.SearchCloths);
 clothRouter.get("/filter", isAuthenticated, ClothController.filter);

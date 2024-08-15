@@ -1,4 +1,4 @@
-import { Request, NextFunction, Response } from "express";
+import { Request, NextFunction, Response, query } from "express";
 import Errorhandler from "../util/errorhandler.util";
 import ClothModel from "../model/wardrobe.model";
 import UploadOnCloudinary from "../util/cloudinary.util";
@@ -278,17 +278,19 @@ class ClothController {
     try {
       const { searchQuery } = req.query;
       if (typeof searchQuery !== "string" || !searchQuery.trim()) {
-        return res.status(400).json({ message: "Invalid search query" });
+        return next(new Errorhandler(400, "Invalid search query"));
       }
+      console.log("this is a query:", searchQuery);
       const userId = req.user?.id;
 
       const result = await ClothModel.find({
         userId,
         $text: { $search: searchQuery.trim() },
       });
-      if (result.length === 0) {
-        return next(new Errorhandler(404, "No result found"));
-      }
+      // if (result.length === 0) {
+      //   return next(new Errorhandler(404, "No result found"));
+      // }
+      console.log("this is a result:", result);
       res.status(200).json({
         message: "searched your results successfully",
         result,
@@ -406,9 +408,7 @@ class ClothController {
       }
       console.log("this is a query:", query);
       const results = await ClothModel.find(query);
-      if (results.length === 0) {
-        return next(new Errorhandler(404, "Sorry no result found "));
-      }
+
       res.status(200).json({
         message: "successfully fetched filtered data ",
         results,
@@ -452,6 +452,9 @@ class ClothController {
   ) {
     const userId = req.user?.id;
     const cloths = await ClothModel.find({ userId }).sort({ wearcount: 1 });
+    if (cloths.length === 0) {
+      return next(new Errorhandler(404, "Sorry, No cloth found "));
+    }
     const leastWorn = cloths.slice(0, 2);
     const mostWorn = cloths.slice(-2).reverse();
     const TotalWearCount = cloths.reduce(
@@ -464,9 +467,7 @@ class ClothController {
     );
     res.status(200).json({
       message: "successfully fetched wear analysis",
-      leastWorn,
-      mostWorn,
-      underUtilizedCloths,
+      wornData: { leastWorn, mostWorn, underUtilizedCloths },
       AverageWearCount,
     });
   }
