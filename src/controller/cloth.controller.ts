@@ -10,62 +10,63 @@ class ClothController {
     res: Response,
     next: NextFunction
   ) {
-    // try {
-    const userId = req.user?.id;
-    if (!req.file) {
-      return next(new Errorhandler(404, "please select file first"));
+    try {
+      const userId = req.user?.id;
+      if (!req.file) {
+        return next(new Errorhandler(404, "please select file first"));
+      }
+
+      const {
+        category,
+        color,
+        size,
+        brand,
+        material,
+        tags,
+        purchaseDate,
+        condition,
+        seasonSuitability,
+        weatherSuitability,
+        wearcount,
+        lastWorn,
+        cost,
+        isFavorite,
+        isArchived,
+      } = req.body;
+      const cloudinary = await UploadOnCloudinary(req.file.path);
+      const imageurl = cloudinary?.secure_url;
+      console.log("this is a req.body data :", req.body);
+
+      const newClothItem = new ClothModel({
+        category,
+        color,
+        size,
+        brand,
+        material,
+        tags: tags.split(","),
+        purchaseDate,
+        condition,
+        wearcount,
+        lastWorn,
+        cost,
+        seasonSuitability: JSON.parse(seasonSuitability),
+        weatherSuitability: JSON.parse(weatherSuitability),
+        isFavorite: isFavorite === "true",
+        isArchived: isArchived === "true",
+        imageurl,
+        userId,
+      });
+      await newClothItem.save();
+
+      res.status(201).json({
+        success: true,
+        message: "Successfully createed your cloth item ",
+        newClothItem,
+      });
+    } catch (error) {
+      console.log("this is a error :", error);
+      next(new Errorhandler(500, "Internal server error"));
     }
-
-    const {
-      category,
-      color,
-      size,
-      brand,
-      material,
-      tags,
-      purchaseDate,
-      condition,
-      seasonSuitability,
-      weatherSuitability,
-      wearcount,
-      lastWorn,
-      cost,
-      isFavorite,
-      isArchived,
-    } = req.body;
-    const cloudinary = await UploadOnCloudinary(req.file.path);
-    const imageurl = cloudinary?.secure_url;
-
-    const newClothItem = new ClothModel({
-      category,
-      color,
-      size,
-      brand,
-      material,
-      tags,
-      purchaseDate,
-      condition,
-      wearcount,
-      lastWorn,
-      cost,
-      seasonSuitability,
-      weatherSuitability,
-      isFavorite,
-      isArchived,
-      imageurl,
-      userId,
-    });
-    await newClothItem.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Successfully createed your cloth item ",
-      newClothItem,
-    });
-    // } catch (error) {
-    //   console.log("this is a error :", error);
-    //   next(new Errorhandler(500, "Internal server error"));
-    // }
   }
   public static async delete(
     req: RequestWithUser,
@@ -544,6 +545,26 @@ class ClothController {
     } catch (error) {
       console.error("Error in getReminder:", error);
       next(new Errorhandler(500, "Internal server error"));
+    }
+  }
+  public static async GetClothInfo(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { clothId } = req.params;
+      const cloth = await ClothModel.findById(clothId);
+      if (!cloth) {
+        return next(new Errorhandler(404, "No results found "));
+      }
+      res.status(200).json({
+        success: true,
+        message: "Successfully fetched your cloth details",
+        cloth,
+      });
+    } catch (error) {
+      next();
     }
   }
   public static async GetCollections(

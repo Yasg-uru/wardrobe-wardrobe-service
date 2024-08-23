@@ -9,12 +9,16 @@ clothRouter.post(
   isAuthenticated,
   ClothController.create
 );
-clothRouter.delete("/:clothId",isAuthenticated,ClothController.delete);
-
+clothRouter.delete("/:clothId", isAuthenticated, ClothController.delete);
 clothRouter.get("/", isAuthenticated, ClothController.Recommandationwheather);
 clothRouter.get("/search", isAuthenticated, ClothController.SearchCloths);
 clothRouter.get("/filter", isAuthenticated, ClothController.filter);
 clothRouter.post("/wear/:clothId", isAuthenticated, ClothController.Wear);
+clothRouter.get(
+  "/details/:clothId",
+  isAuthenticated,
+  ClothController.GetClothInfo
+);
 clothRouter.get(
   "/wear/analysis",
   isAuthenticated,
