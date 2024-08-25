@@ -495,12 +495,7 @@ class ClothController {
         "weatherSuitability.isRainSuitable": isRainy,
       });
 
-      if (rainyClothsCount < minimumStockThreshold) {
-        // sendReminder(
-        //   user.email,
-        //   "Low Rainy Weather Clothes Stock",
-        //   `You have only ${rainyClothsCount} rainy weather suitable clothes. Consider adding more.`
-        // );
+      if (rainyClothsCount < minimumStockThreshold && isRainy) {
         return res.status(200).json({
           title: "Low Rainy Weather Clothes Stock",
           reminder: `You have only ${rainyClothsCount} rainy weather suitable clothes. Consider adding more.`,
@@ -512,12 +507,7 @@ class ClothController {
         "seasonSuitability.isSummer": isSummer,
       });
 
-      if (summerClothsCount < minimumStockThreshold) {
-        // sendReminder(
-        //   user.email,
-        //   "Low Summer Clothes Stock",
-        //   `You have only ${summerClothsCount} summer clothes. Consider adding more.`
-        // );
+      if (summerClothsCount < minimumStockThreshold && isSummer) {
         return res.status(200).json({
           title: "Low Summer Clothes Stock",
           reminder: `You have only ${summerClothsCount} summer clothes. Consider adding more.`,
@@ -529,19 +519,18 @@ class ClothController {
         "weatherSuitability.isWinterSuitable": isWinter,
       });
 
-      if (winterClothsCount < minimumStockThreshold) {
-        // sendReminder(
-        //   user.email,
-        //   "Low Winter Clothes Stock",
-        //   `You have only ${winterClothsCount} winter clothes. Consider adding more.`
-        // );
+      if (winterClothsCount < minimumStockThreshold && isWinter) {
         return res.status(200).json({
           title: "Low Winter Clothes Stock",
           reminder: `You have only ${winterClothsCount} winter clothes. Consider adding more.`,
         });
       }
 
-      return res.status(200).json({ message: "Reminder check completed" });
+      return res.status(200).json({
+        title: "Seasonal Clothing Update",
+        reminder:
+          "You’re all set! You have enough clothing for the current season.",
+      });
     } catch (error) {
       console.error("Error in getReminder:", error);
       next(new Errorhandler(500, "Internal server error"));
@@ -586,6 +575,46 @@ class ClothController {
       });
     } catch (error) {
       next(new Errorhandler(500, "Internal server error"));
+    }
+  }
+  public static async GetArchiveCloths(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user?.id;
+      const Cloths = await ClothModel.find({ userId, isArchived: true });
+      if (Cloths.length === 0) {
+        return next(new Errorhandler(404, "No cloths found"));
+      }
+      res.status(200).json({
+        Cloths,
+      });
+    } catch (error) {
+      next();
+    }
+  }
+  //remove from archive
+
+  public static async RemoveFromArchive(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { clothId } = req.params;
+      const cloth = await ClothModel.findById(clothId);
+      if (!cloth) {
+        return next(new Errorhandler(404, "cloth not found"));
+      }
+      cloth.isArchived = false;
+      await cloth.save();
+      res.status(200).json({
+        message: "Successfully Removed from Archive",
+      });
+    } catch (error) {
+      next();
     }
   }
 }
