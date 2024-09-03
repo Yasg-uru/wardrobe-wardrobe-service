@@ -31,6 +31,10 @@ clothRouter.get(
 );
 clothRouter.get("/reminder", isAuthenticated, ClothController.getReminder);
 clothRouter.get("/archive", isAuthenticated, ClothController.GetArchiveCloths);
-clothRouter.put("/remove-archive/:clothId", isAuthenticated, ClothController.RemoveFromArchive);
+clothRouter.put(
+  "/remove-archive/:clothId",
+  isAuthenticated,
+  ClothController.RemoveFromArchive
+);
 
 export default clothRouter;
