@@ -8,17 +8,20 @@ export const isAuthenticated = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies.token;
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
   if (!token) {
     return next(new Errorhandler(400, "please Login to continue"));
   }
-//   console.log("this is a token :", token);
+  //   console.log("this is a token :", token);
 
-  const decoded = jwt.verify(token,  process.env.JWT_SECRET as string) as JWT_Decoded;
-//   const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+  const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET as string
+  ) as JWT_Decoded;
+  //   const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
   if (!decoded) {
     return next(new Errorhandler(400, "please login to continue"));
   }
-  req.user = decoded ;
+  req.user = decoded;
   next();
 };
