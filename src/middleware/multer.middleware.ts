@@ -4,11 +4,11 @@ import path from "path";
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
-    const uploadDir = path.join(process.cwd(), "/uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir);
-    }
-    callback(null, uploadDir);
+    // const uploadDir = path.join(process.cwd(), "/uploads");
+    // if (!fs.existsSync(uploadDir)) {
+    //   fs.mkdirSync(uploadDir);
+    // }
+    callback(null, "/temp");
   },
   filename: (req, file, callback) => {
     callback(null, file.originalname);
