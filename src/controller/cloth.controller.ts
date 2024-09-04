@@ -65,7 +65,7 @@ class ClothController {
       });
     } catch (error) {
       console.log("this is a error :", error);
-      next();
+      next(error);
     }
   }
   public static async delete(
