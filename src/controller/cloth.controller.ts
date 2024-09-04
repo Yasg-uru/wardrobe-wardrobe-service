@@ -65,7 +65,7 @@ class ClothController {
       });
     } catch (error) {
       console.log("this is a error :", error);
-      next(new Errorhandler(500, "Internal server error"));
+      next();
     }
   }
   public static async delete(
