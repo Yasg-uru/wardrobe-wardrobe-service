@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 4001;
 app.use("/cloth", clothRouter);
 
 connectDb();
-app.use(ErrorhandlerMiddleware);
+// app.use(ErrorhandlerMiddleware);
 
 app.listen(PORT, () => {
   console.log(`wardrobe service is running on port : ${PORT}`);
