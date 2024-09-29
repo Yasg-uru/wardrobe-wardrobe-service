@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const multer_middleware_1 = __importDefault(require("../middleware/multer.middleware"));
+const cloth_controller_1 = __importDefault(require("../controller/cloth.controller"));
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const clothRouter = (0, express_1.Router)();
+clothRouter.post("/create", multer_middleware_1.default.single("imageurl"), auth_middleware_1.isAuthenticated, cloth_controller_1.default.create);
+clothRouter.delete("/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.delete);
+clothRouter.get("/", auth_middleware_1.isAuthenticated, cloth_controller_1.default.Recommandationwheather);
+clothRouter.get("/search", auth_middleware_1.isAuthenticated, cloth_controller_1.default.SearchCloths);
+clothRouter.get("/filter", auth_middleware_1.isAuthenticated, cloth_controller_1.default.filter);
+clothRouter.post("/wear/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.Wear);
+clothRouter.get("/details/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetClothInfo);
+clothRouter.get("/wear/analysis", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetWearAnalysis);
+clothRouter.get("/collections", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetCollections);
+clothRouter.get("/reminder", auth_middleware_1.isAuthenticated, cloth_controller_1.default.getReminder);
+clothRouter.get("/archive", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetArchiveCloths);
+clothRouter.put("/remove-archive/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.RemoveFromArchive);
+exports.default = clothRouter;
