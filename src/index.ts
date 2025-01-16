@@ -6,6 +6,7 @@ import clothRouter from "./router/cloth.router";
 import cors from "cors";
 
 import cookieParser from "cookie-parser";
+import UserRouter from "./router/user.route";
 
 config();
 
@@ -23,6 +24,8 @@ app.use(cookieParser());
 
 const PORT = process.env.PORT || 4001;
 app.use("/cloth", clothRouter);
+app.use('/user',UserRouter);
+
 
 connectDb();
 app.use(ErrorhandlerMiddleware);
