@@ -65,7 +65,7 @@ class ClothController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { clothId } = req.params;
-                const deletedcloth = yield wardrobe_model_1.default.findById(clothId);
+                const deletedcloth = yield wardrobe_model_1.default.findByIdAndDelete(clothId);
                 if (!deletedcloth) {
                     return next(new errorhandler_util_1.default(404, "cloth not found"));
                 }
@@ -515,22 +515,43 @@ class ClothController {
         });
     }
     //remove from archive
-    static RemoveFromArchive(req, res, next) {
+    static ToggleArchive(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { clothId } = req.params;
                 const cloth = yield wardrobe_model_1.default.findById(clothId);
                 if (!cloth) {
-                    return next(new errorhandler_util_1.default(404, "cloth not found"));
+                    return next(new errorhandler_util_1.default(404, "Cloth not found"));
                 }
-                cloth.isArchived = false;
+                cloth.isArchived = !cloth.isArchived;
                 yield cloth.save();
                 res.status(200).json({
-                    message: "Successfully Removed from Archive",
+                    message: `Successfully ${cloth.isArchived ? "archived" : "unarchived"} from Archive`,
+                    cloth
                 });
             }
             catch (error) {
-                next();
+                next(error);
+            }
+        });
+    }
+    static ToggleFavorite(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { clothId } = req.params;
+                const cloth = yield wardrobe_model_1.default.findById(clothId);
+                if (!cloth) {
+                    return next(new errorhandler_util_1.default(404, "Cloth not found"));
+                }
+                cloth.isFavorite = !cloth.isFavorite;
+                yield cloth.save();
+                res.status(200).json({
+                    message: `Successfully ${cloth.isFavorite ? "added to" : "removed from"} favorites`,
+                    cloth
+                });
+            }
+            catch (error) {
+                next(error);
             }
         });
     }

@@ -19,5 +19,6 @@ clothRouter.get("/wear/analysis", auth_middleware_1.isAuthenticated, cloth_contr
 clothRouter.get("/collections", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetCollections);
 clothRouter.get("/reminder", auth_middleware_1.isAuthenticated, cloth_controller_1.default.getReminder);
 clothRouter.get("/archive", auth_middleware_1.isAuthenticated, cloth_controller_1.default.GetArchiveCloths);
-clothRouter.put("/remove-archive/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.RemoveFromArchive);
+clothRouter.put("/toggle-archive/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.ToggleArchive);
+clothRouter.put("/toggle-favourate/:clothId", auth_middleware_1.isAuthenticated, cloth_controller_1.default.ToggleFavorite);
 exports.default = clothRouter;

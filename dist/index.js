@@ -14,12 +14,12 @@ const user_route_1 = __importDefault(require("./router/user.route"));
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
     origin: ["https://virtual-wardrobe-frontend.vercel.app", "http://localhost:5173"],
     credentials: true,
 }));
 app.use(express_1.default.urlencoded({ extended: false }));
-app.use((0, cookie_parser_1.default)());
 const PORT = process.env.PORT || 4001;
 app.use("/cloth", cloth_router_1.default);
 app.use('/user', user_route_1.default);
