@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const multer_middleware_1 = __importDefault(require("../middleware/multer.middleware"));
+const user_controller_1 = __importDefault(require("../controller/user.controller"));
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const UserRouter = (0, express_1.Router)();
+UserRouter.post("/create", multer_middleware_1.default.single("profileUrl"), user_controller_1.default.Register);
+UserRouter.post("/verify", user_controller_1.default.verify);
+UserRouter.get("/check-auth", auth_middleware_1.isAuthenticated, user_controller_1.default.checkAuth);
+UserRouter.post("/login", user_controller_1.default.Login);
+UserRouter.get("/alluser", user_controller_1.default.getAlluser);
+UserRouter.post("/forgotpassword/:email", user_controller_1.default.ForgotPassword);
+UserRouter.post("/reset/:token", user_controller_1.default.ResetPassword);
+UserRouter.post("/logout", user_controller_1.default.Logout);
+UserRouter.put("/edit-profile", auth_middleware_1.isAuthenticated, multer_middleware_1.default.single("profileUrl"), user_controller_1.default.editProfile);
+exports.default = UserRouter;

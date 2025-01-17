@@ -10,6 +10,7 @@ const error_middleware_1 = require("./middleware/error.middleware");
 const cloth_router_1 = __importDefault(require("./router/cloth.router"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const user_route_1 = __importDefault(require("./router/user.route"));
 (0, dotenv_1.config)();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -21,6 +22,7 @@ app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 const PORT = process.env.PORT || 4001;
 app.use("/cloth", cloth_router_1.default);
+app.use('/user', user_route_1.default);
 (0, connectDb_1.default)();
 app.use(error_middleware_1.ErrorhandlerMiddleware);
 app.listen(PORT, () => {
