@@ -75,7 +75,7 @@ class ClothController {
   ) {
     try {
       const { clothId } = req.params;
-      const deletedcloth = await ClothModel.findById(clothId);
+      const deletedcloth = await ClothModel.findByIdAndDelete(clothId);
       if (!deletedcloth) {
         return next(new Errorhandler(404, "cloth not found"));
       }
@@ -597,7 +597,7 @@ class ClothController {
   }
   //remove from archive
 
-  public static async RemoveFromArchive(
+  public static async ToggleArchive(
     req: RequestWithUser,
     res: Response,
     next: NextFunction
@@ -605,17 +605,47 @@ class ClothController {
     try {
       const { clothId } = req.params;
       const cloth = await ClothModel.findById(clothId);
+      
       if (!cloth) {
-        return next(new Errorhandler(404, "cloth not found"));
+        return next(new Errorhandler(404, "Cloth not found"));
       }
-      cloth.isArchived = false;
+  
+      cloth.isArchived = !cloth.isArchived;
       await cloth.save();
+  
       res.status(200).json({
-        message: "Successfully Removed from Archive",
+        message: `Successfully ${cloth.isArchived ? "archived" : "unarchived"} from Archive`,
+        cloth
       });
     } catch (error) {
-      next();
+      next(error); 
     }
   }
+  public static async ToggleFavorite(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { clothId } = req.params;
+      const cloth = await ClothModel.findById(clothId);
+      
+      if (!cloth) {
+        return next(new Errorhandler(404, "Cloth not found"));
+      }
+  
+      cloth.isFavorite = !cloth.isFavorite;
+      await cloth.save();
+  
+      res.status(200).json({
+        message: `Successfully ${cloth.isFavorite ? "added to" : "removed from"} favorites`,
+        cloth
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  
+  
 }
 export default ClothController;

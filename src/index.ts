@@ -12,6 +12,7 @@ config();
 
 const app: Application = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: ["https://virtual-wardrobe-frontend.vercel.app","http://localhost:5173"],
@@ -20,7 +21,6 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 const PORT = process.env.PORT || 4001;
 app.use("/cloth", clothRouter);
