@@ -17,5 +17,11 @@ UserRouter.post("/forgotpassword/:email", UserController.ForgotPassword);
 UserRouter.post("/reset/:token", UserController.ResetPassword);
 
 UserRouter.post("/logout", UserController.Logout);
+UserRouter.put(
+  "/edit-profile",
+  isAuthenticated,
+  upload.single("profileUrl"),
+  UserController.editProfile
+);
 
 export default UserRouter;

@@ -265,5 +265,53 @@ class UserController {
       next();
     }
   }
+
+  public static async editProfile(
+    req: RequestWithUser,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return next(new Errorhandler(401, "Unauthorized: Please log in"));
+      }
+
+      let updateData = { ...req.body }; // Clone req.body to modify it
+
+      // Handle profile image upload if provided
+      if (req.file) {
+        const file = req.file.path; // File path from multer
+
+        // Upload image to Cloudinary
+        const uploadResult = await UploadOnCloudinary(file);
+
+        if (!uploadResult) {
+          return next(new Errorhandler(500, "Failed to upload image"));
+        }
+
+        updateData.profileUrl = uploadResult.secure_url; // Store the Cloudinary URL
+      }
+
+      // Update user profile
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        userId,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      ).select("-passwordHash -refreshToken");
+
+      if (!updatedUser) {
+        return next(new Errorhandler(404, "User not found"));
+      }
+
+      res.status(200).json({
+        message: "Profile updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+
 export default UserController;
