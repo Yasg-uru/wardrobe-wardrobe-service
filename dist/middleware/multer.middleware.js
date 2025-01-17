@@ -9,9 +9,9 @@ const path_1 = __importDefault(require("path"));
 const storage = multer_1.default.diskStorage({
     destination: (req, file, callback) => {
         const uploadDir = path_1.default.join(process.cwd(), "/uploads");
-        // if (!fs_1.default.existsSync(uploadDir)) {
-        //     fs_1.default.mkdirSync(uploadDir);
-        // }
+        if (!fs_1.default.existsSync(uploadDir)) {
+            fs_1.default.mkdirSync(uploadDir);
+        }
         callback(null, uploadDir);
     },
     filename: (req, file, callback) => {
